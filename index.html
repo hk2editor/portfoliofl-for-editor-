@@ -1,163 +1,225 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mobile Editor Portfolio</title>
+<title>AI Quiz Final</title>
 
 <style>
-
 body {
-  margin: 0;
-  font-family: sans-serif;
-  background: linear-gradient(135deg, #020617, #0f172a);
-  color: white;
+ margin:0;
+ font-family:sans-serif;
+ background:linear-gradient(135deg,#020617,#0f172a);
+ color:white;
+ text-align:center;
 }
-
-/* HERO */
-.hero {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.hero h1 {
-  font-size: 32px;
-}
-
-.hero span {
-  color: #22c55e;
-}
-
-.hero p {
-  color: #94a3b8;
-}
-
+.container { padding:15px; max-width:500px; margin:auto;}
+h2 { color:#00f2ff; text-shadow:0 0 10px #00f2ff;}
 .btn {
-  margin-top: 15px;
-  padding: 12px 25px;
-  background: #22c55e;
-  border: none;
-  border-radius: 30px;
-  color: black;
-  font-weight: bold;
+ width:100%; padding:15px; margin:8px 0;
+ border:none; border-radius:10px;
+ background:#020617; color:white;
+ box-shadow:0 0 10px #0ea5e9;
 }
-
-/* REELS STYLE PORTFOLIO */
-.reels {
-  display: flex;
-  overflow-x: auto;
-  gap: 15px;
-  padding: 20px;
+#progressBox {
+ width:100%; background:#111;
+ border-radius:10px; overflow:hidden;
 }
-
-.reel {
-  min-width: 200px;
-  background: #1e293b;
-  border-radius: 15px;
-  overflow: hidden;
+#progress {
+ height:10px; width:0%;
+ background:#00f2ff;
 }
-
-.reel video {
-  width: 100%;
+#popup {
+ position:fixed; width:100%; height:100%;
+ background:black; display:flex;
+ justify-content:center; align-items:center;
 }
-
-/* SERVICES */
-.services {
-  padding: 30px 20px;
-}
-
-.service {
-  background: #1e293b;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 10px;
-}
-
-/* SKILLS */
-.skills {
-  padding: 20px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.skill {
-  background: #22c55e;
-  color: black;
-  padding: 8px 15px;
-  border-radius: 20px;
-}
-
-/* CONTACT */
-.contact {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-footer {
-  text-align: center;
-  padding: 15px;
-  background: black;
-}
-
+.box { background:#111; padding:20px; border-radius:10px;}
+input { padding:10px; margin:5px; width:90%;}
 </style>
 </head>
 
 <body>
 
-<!-- HERO -->
-<div class="hero">
-  <h1>I Edit <span>Viral Reels</span></h1>
-  <p>Short form content that gets views, likes & followers</p>
-  <button class="btn">Hire Me</button>
+<div id="popup">
+ <div class="box">
+  <h3>Start Quiz</h3>
+  <input id="name" placeholder="Name"><br>
+  <input id="time" type="number" placeholder="Time (seconds)"><br>
+  <input id="qCount" type="number" placeholder="Number of Questions"><br>
+  <button class="btn" onclick="start()">Start</button>
+ </div>
 </div>
 
-<!-- PORTFOLIO (REELS STYLE) -->
-<div class="reels">
+<div class="container">
+ <h2 id="title"></h2>
+ <div id="timer"></div>
 
-  <div class="reel">
-    <video src="reel1.mp4" controls></video>
-  </div>
+ <div id="progressBox">
+  <div id="progress"></div>
+ </div>
 
-  <div class="reel">
-    <video src="reel2.mp4" controls></video>
-  </div>
+ <div id="question"></div>
+ <div id="options"></div>
 
-  <div class="reel">
-    <video src="reel3.mp4" controls></video>
-  </div>
+ <h3 id="result"></h3>
+ <button id="reviewBtn" class="btn" style="display:none;" onclick="showReview()">📊 Review</button>
 
+ <div id="review"></div>
 </div>
 
-<!-- SERVICES -->
-<div class="services">
-  <h2>Services</h2>
+<script>
 
-  <div class="service">🔥 Viral Reels Editing</div>
-  <div class="service">🎬 YouTube Shorts</div>
-  <div class="service">🎧 Beat Sync + Subtitles</div>
-  <div class="service">🎨 Color Grading</div>
+const data = [
+{c:"श्रीलंका",cap:"श्री जयवर्धनेपुरा",cur:"रुपया"},
+{c:"ईरान",cap:"तेहरान",cur:"रियाल"},
+{c:"इराक",cap:"बगदाद",cur:"दिनार"},
+{c:"इंडोनेशिया",cap:"जकार्ता",cur:"रुपिया"},
+{c:"बहरीन",cap:"मनामा",cur:"दिनार"},
+{c:"मलेशिया",cap:"क्वाला लंपुर",cur:"रिंगगिट"},
+{c:"मंगोलिया",cap:"उलान बाटोर",cur:"तुगरिक"},
+{c:"मालदीव",cap:"माले",cur:"रुफिया"},
+{c:"लेबनान",cap:"बेरूत",cur:"पाउंड"},
+{c:"थाइलैण्ड",cap:"बैंकाक",cur:"बहत"},
+{c:"संयुक्त अरब अमीरात",cap:"अबूधाबी",cur:"दिरहम"},
+{c:"ताइवान",cap:"ताइपे",cur:"डॉलर"},
+{c:"किर्गिस्तान",cap:"बिश्कक",cur:"सोम"},
+{c:"तुर्की",cap:"अंकारा",cur:"लीरा"},
+{c:"इजराइल",cap:"जेरूसलम",cur:"शेकेल"},
+{c:"जॉर्डन",cap:"अम्मान",cur:"दिनार"},
+{c:"कतर",cap:"दोहा",cur:"रियाल"},
+{c:"कम्बोडिया",cap:"नोम पेन्ह",cur:"रिएल"},
+{c:"उत्तर कोरिया",cap:"प्योंगयांग",cur:"वॉन"},
+{c:"दक्षिण कोरिया",cap:"सिओल",cur:"वॉन"},
+{c:"ओमान",cap:"मस्कट",cur:"रियाल"}
+];
 
-</div>
+let qList=[],current=0,score=0,time=0,timerInt;
+let review=[],totalQ=0;
 
-<!-- SKILLS -->
-<div class="skills">
-  <div class="skill">CapCut</div>
-  <div class="skill">Alight Motion</div>
-  <div class="skill">VN Editor</div>
-  <div class="skill">Beat Sync</div>
-</div>
+// 🔊 Voice
+function speak(text){
+ speechSynthesis.cancel();
+ let s=new SpeechSynthesisUtterance(text);
+ s.lang="hi-IN";
+ speechSynthesis.speak(s);
+}
 
-<!-- CONTACT -->
-<div class="contact">
-  <h2>Work With Me</h2>
-  <p>DM me for viral edits</p>
-  <button class="btn">WhatsApp Me</button>
-</div>
+function shuffle(a){return a.sort(()=>Math.random()-0.5)}
 
-<footer>
-  © 2026 Mobile Editor Portfolio
-</footer>
+// 🔥 type added
+function genQ(){
+ let q=[];
+ data.forEach(d=>{
+  q.push({q:d.c+" की राजधानी?",a:d.cap,type:"cap"});
+  q.push({q:d.cap+" किस देश की राजधानी?",a:d.c,type:"country"});
+  q.push({q:d.c+" की मुद्रा?",a:d.cur,type:"cur"});
+  q.push({q:d.cur+" किस देश की मुद्रा?",a:d.c,type:"country"});
+ });
+ return shuffle(q);
+}
+
+function start(){
+ let name=document.getElementById("name").value;
+ time=parseInt(document.getElementById("time").value);
+ totalQ=parseInt(document.getElementById("qCount").value);
+
+ if(!name||!time||!totalQ) return alert("Fill all fields");
+
+ document.getElementById("popup").style.display="none";
+ document.getElementById("title").innerText="👤 "+name;
+
+ let allQ=genQ();
+
+ if(totalQ > allQ.length){
+  totalQ = allQ.length;
+ }
+
+ qList = allQ.slice(0,totalQ);
+
+ loadQ();
+ startTimer();
+}
+
+function loadQ(){
+ if(current>=qList.length) return end();
+
+ let q=qList[current];
+
+ document.getElementById("question").innerText=q.q;
+ speak(q.q);
+
+ let pool=[];
+
+ // 🔥 type-based options
+ if(q.type==="cap") pool = data.map(x=>x.cap);
+ else if(q.type==="country") pool = data.map(x=>x.c);
+ else if(q.type==="cur") pool = data.map(x=>x.cur);
+
+ let opts = shuffle(pool).slice(0,3);
+
+ if(!opts.includes(q.a)){
+  opts.push(q.a);
+ }
+
+ opts = shuffle(opts);
+
+ let html="";
+ opts.forEach(o=>{
+  html+=`<button class="btn" onclick="check('${o}')">${o}</button>`;
+ });
+
+ document.getElementById("options").innerHTML=html;
+
+ let percent=(current/totalQ)*100;
+ document.getElementById("progress").style.width=percent+"%";
+}
+
+function check(ans){
+ let correct=qList[current].a;
+
+ if(ans===correct){
+  score++;
+  review.push({q:qList[current].q,y:ans,c:correct,s:"✅"});
+ }else{
+  score--;
+  review.push({q:qList[current].q,y:ans,c:correct,s:"❌"});
+ }
+
+ current++;
+ setTimeout(loadQ,200);
+}
+
+function startTimer(){
+ timerInt=setInterval(()=>{
+  time--;
+  document.getElementById("timer").innerText="⏱ "+time;
+
+  if(time<=0){
+   clearInterval(timerInt);
+   end();
+  }
+ },1000);
+}
+
+function end(){
+ speechSynthesis.cancel();
+ document.getElementById("question").innerText="Finished!";
+ document.getElementById("options").innerHTML="";
+ document.getElementById("result").innerText="Score: "+score;
+
+ document.getElementById("reviewBtn").style.display="block";
+}
+
+function showReview(){
+ let r="<h3>📊 Review</h3>";
+ review.forEach(x=>{
+  r+=`<p>${x.s} ${x.q}<br>Your: ${x.y} | Correct: ${x.c}</p>`;
+ });
+ document.getElementById("review").innerHTML=r;
+}
+
+</script>
 
 </body>
 </html>
